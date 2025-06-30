@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 兼容性样式 */
+.filter-compatible {
+
+}
+
+.text-size-adjust-compatible {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
