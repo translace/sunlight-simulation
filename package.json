@@ -12,6 +12,7 @@
     "@tailwindcss/postcss7-compat": "^2.2.17",
     "@turf/turf": "^7.2.0",
     "dayjs": "^1.11.13",
+    "lodash-es": "^4.17.21",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11",

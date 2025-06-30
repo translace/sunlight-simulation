@@ -29,6 +29,7 @@ class ErrorBoundary extends Component {
 
 function App() {
   const [shadows, setShadows] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
     <div className="container mx-auto p-2 filter-compatible text-size-adjust-compatible">
@@ -40,12 +41,14 @@ function App() {
           <SimulationPanel 
             buildings={BUILDINGS} 
             onUpdateShadow={setShadows} 
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
           />
         </div>
         
         {/* 3D场景 */}
         <div className="lg:col-span-2">
-          <ThreeDScene shadows={shadows} />
+          <ThreeDScene shadows={shadows} selectedDate={selectedDate} />
         </div>
       </div>
     </div>

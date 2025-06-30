@@ -1,19 +1,17 @@
 // src/components/SimulationPanel.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LOCATIONS } from '../data/models';
 import { calculateSunPosition, calculateShadow } from '../utils/sunlight-calculator';
 import dayjs from 'dayjs';
 
-function SimulationPanel({ buildings, onUpdateShadow }) {
+
+function SimulationPanel({ buildings, onUpdateShadow, selectedDate, setSelectedDate }) {
   const [selectedLocation, setSelectedLocation] = useState(LOCATIONS[0]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  
-  useEffect(() => {
-    // 当位置或日期变化时，重新计算阴影
-    const updateSimulation = () => {
+
+  const updateSimulation = useCallback(() => {
       const sunPosition = calculateSunPosition(
-        selectedDate, 
-        selectedLocation.latitude, 
+        selectedDate,
+        selectedLocation.latitude,
         selectedLocation.longitude
       );
       
@@ -23,14 +21,31 @@ function SimulationPanel({ buildings, onUpdateShadow }) {
       }));
       
       onUpdateShadow(shadows);
-    };
-    
+    },
+    [selectedLocation, selectedDate, buildings, onUpdateShadow]
+  );
+
+  useEffect(() => {
     updateSimulation();
-  }, [selectedLocation, selectedDate, buildings, onUpdateShadow]);
+  }, [selectedLocation, selectedDate, buildings, onUpdateShadow, updateSimulation]);
+
+  const handleTimeChange = (e) => {
+    const totalMinutes = parseInt(e.target.value, 10);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const newDate = new Date(selectedDate);
+    newDate.setHours(hours);
+    newDate.setMinutes(minutes);
+    setSelectedDate(newDate);
+  };
+
+  const getTotalMinutes = () => {
+    return selectedDate.getHours() * 60 + selectedDate.getMinutes();
+  };
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold mb-4">模拟设置</h2>
+      <h2 className="text-lg font-semibold mb-4">模拟设置</h2> 
       
       {/* 地区选择 */}
       <div className="mb-4">
@@ -49,7 +64,7 @@ function SimulationPanel({ buildings, onUpdateShadow }) {
             <option key={location.id} value={location.id}>{location.name}</option>
           ))}
         </select>
-      </div>
+      </div> 
       
       {/* 日期选择 */}
       <div className="mb-4">
@@ -57,32 +72,34 @@ function SimulationPanel({ buildings, onUpdateShadow }) {
         <input
           type="date"
           value={dayjs(selectedDate).format('YYYY-MM-DD')}
-          onChange={(e) => setSelectedDate(new Date(e.target.value))}
+          onChange={(e) => {
+            const newDate = new Date(e.target.value);
+            newDate.setHours(selectedDate.getHours());
+            newDate.setMinutes(selectedDate.getMinutes());
+            setSelectedDate(newDate);
+          }}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           title="请选择日期"
           placeholder="请选择日期"
         />
-      </div>
+      </div> 
       
-      {/* 时间选择 */}
+      {/* 时间滑块 */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">时间</label>
         <input
-          type="time"
-          value={dayjs(selectedDate).format('HH:mm')}
-          onChange={(e) => {
-            const [hours, minutes] = e.target.value.split(':');
-            const newDate = new Date(selectedDate);
-            newDate.setHours(parseInt(hours, 10));
-            newDate.setMinutes(parseInt(minutes, 10));
-            setSelectedDate(newDate);
-          }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          title="请选择时间"
-          placeholder="请选择时间"
+          type="range"
+          min="0"
+          max="1439"
+          value={getTotalMinutes()}
+          onChange={handleTimeChange}
+          className="w-full"
         />
-      </div>
-    </div>
+        <div className="text-sm text-gray-500">
+          {dayjs(selectedDate).format('HH:mm')}
+        </div>
+      </div> 
+    </div> 
   );
 }
 
